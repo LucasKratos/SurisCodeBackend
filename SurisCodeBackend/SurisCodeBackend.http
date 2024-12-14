@@ -1,0 +1,6 @@
+@SurisCodeBackend_HostAddress = http://localhost:5094
+
+GET {{SurisCodeBackend_HostAddress}}/
+Accept: application/json
+
+###
