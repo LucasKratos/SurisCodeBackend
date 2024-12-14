@@ -4,13 +4,21 @@ using SurisCodeBackend.Models;
 namespace SurisCodeBackend.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")] 
     public class ArticlesController : ControllerBase
     {
-        [HttpGet(Name = "GetArticles")]
-        public ArticlesResponse Get()
+        [HttpGet]
+        public IActionResult GetArticles()
         {
-            return new ArticlesResponse(Article.GetList());
+            try
+            {
+                var articles = Article.GetList();
+                return Ok(new ArticlesResponse(articles));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Error interno del servidor", Error = ex.Message });
+            }
         }
     }
 }

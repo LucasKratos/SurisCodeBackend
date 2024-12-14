@@ -1,25 +1,27 @@
 using Microsoft.AspNetCore.Mvc;
 using SurisCodeBackend.Models;
+using System.Linq;
 
 namespace SurisCodeBackend.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class PurchaseOrdersController : ControllerBase
     {
-        [HttpPost(Name = "SubmitPurchaseOrder")]
+        [HttpPost]
         public IActionResult SubmitOrder([FromBody] PurchaseOrder purchaseOrder)
         {
             try
             {
                 ValidateSellerExists(purchaseOrder.Vendedor);
                 ValidateArticlesAndTotal(purchaseOrder.Articulos);
+
+                return Ok(new { message = "Orden cargada con éxito." });
             }
             catch (Exception ex)
             {
-                return NotFound(new { error = ex.Message });
+                return BadRequest(new { error = ex.Message });
             }
-            return Ok(new { message = "Orden cargada con éxito." });
         }
 
         private void ValidateSellerExists(int vendedorId)
@@ -29,22 +31,22 @@ namespace SurisCodeBackend.Controllers
                 throw new Exception("Vendedor no válido o no encontrado.");
             }
         }
-
         private void ValidateArticlesAndTotal(List<string> articulos)
         {
-            if (!articulos.Any())
+            if (articulos == null || !articulos.Any())
             {
-                throw new Exception("La Lista de articulos esta vacia.");
+                throw new Exception("La lista de artículos está vacía.");
             }
+
             List<string> invalidArticles = articulos
                 .Where(a => !Article.GetList().Any(article => article.Codigo == a))
-                .Select(a => a)
                 .ToList();
 
             if (invalidArticles.Any())
             {
                 throw new Exception($"Artículos inválidos: {string.Join(", ", invalidArticles)}.");
             }
+
             double totalOrderValue = articulos
                 .Sum(a => Article.GetList().First(article => article.Codigo == a).Precio);
 
